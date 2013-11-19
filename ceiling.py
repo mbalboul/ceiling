@@ -1,4 +1,5 @@
-#If anyone's curious, my best score w/o dying once is 7407...8063.
+#My high score with the 16x16 system is 7407... now 8063.
+#New high score with the 24x24 system - 6142.
 
 import sys, pygame, random, math
 from pygame.locals import *
@@ -14,6 +15,8 @@ totalTime = 0 #This is a simple time counter.
 crvlManager = 0 #This is declared as a global variable so I can call it from within classes if need be.
 bulletManager = 0 
 playerManager = 0
+scoreFont = pygame.font.Font(None, 24)
+death = 0 #Record the first death the player experiences by keeping track of it in the first place.
 
 
 """
@@ -262,16 +265,15 @@ class Bullet(pygame.sprite.Sprite):
 """
 Player character sprite.
 """
-
 class Player(pygame.sprite.Sprite):
     def __init__(self, *args, **kwargs):
         super(Player, self).__init__(*args, **kwargs)
-        self.image = pygame.image.load("player.png")
-        self.rect = pygame.Rect(312, 400, 16, 8)
+        self.image = pygame.image.load("player_24.png")
+        self.rect = pygame.Rect(312, 392, 24, 24)
         self.speed = 0 #This parameter is changed as speed is changed - update handles the actual movement.
         
     def left(self):
-        self.speed += -8
+        self.speed -= 8
         
     def right(self):
         self.speed += 8
@@ -320,11 +322,18 @@ while(1):
     crvlManager.update()
     bulletManager.update()
     playerManager.update()
+    screen.blit(scoreFont.render(format(totalTime), 0, [255,255,255]), [0,80])
+    if (death != 0): screen.blit(scoreFont.render(deathstring, 0, [255,255,255]), [0,64])
     if (totalTime%100 == 0): crvlManager.newEnemy()
     pygame.display.update(crvlManager.draw(screen))
     pygame.display.update(bulletManager.draw(screen))
     pygame.display.update(playerManager.draw(screen))
+    pygame.display.update([0,64,480,32])
+    
     if pygame.sprite.spritecollideany(player, bulletManager):
         print totalTime #Implement a soft-death hard-death score system for the character
-        player.image = pygame.image.load("player_dead.png")
+        if (death == 0):
+            death = 1
+            deathstring = "You died at "+format(totalTime)+"."
+            player.image = pygame.image.load("player_doom.png") #Consider multiplying colors by 4 instead of 3?
     
